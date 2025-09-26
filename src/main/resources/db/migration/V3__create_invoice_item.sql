@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS invoice_items (
+CREATE TABLE IF NOT EXISTS invoice_item (
     id BIGSERIAL PRIMARY KEY,
     description VARCHAR(255) NOT NULL,
     quantity NUMERIC(12,2) NOT NULL,
@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     vat_value NUMERIC(12,2) NOT NULL,
     gross_value NUMERIC(12,2) NOT NULL,
     invoice_id BIGINT NOT NULL,
-    CONSTRAINT fk_item_invoice FOREIGN KEY (invoice_id) REFERENCES invoices(id)
+    CONSTRAINT fk_item_invoice FOREIGN KEY (invoice_id) REFERENCES invoice(id)
 );
