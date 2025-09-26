@@ -1,0 +1,31 @@
+# Ignore Maven target directory
+target/
+
+# Ignore local IDE files
+*.iml
+*.idea/
+*.classpath
+*.project
+*.settings/
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.swp
+*.bak
+
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore Docker Compose override files
+docker-compose.override.yml
+
+# Ignore environment files (optional, if you don't want secrets in the image)
+.env
