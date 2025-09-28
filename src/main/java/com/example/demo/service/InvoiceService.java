@@ -61,12 +61,8 @@ public class InvoiceService {
         Client client;
         String nip = invoiceRequest.getClient().getNip();
 
-        if (nip != null && !nip.isBlank()) {
-            client = clientRepository.findByNip(nip)
-                    .orElseGet(() -> clientRepository.save(new Client().updateFromRequest(invoiceRequest.getClient())));
-        } else {
-            client = clientRepository.save(new Client().updateFromRequest(invoiceRequest.getClient()));
-        }
+        client = clientRepository.findByNip(nip)
+                .orElseGet(() -> clientRepository.save(new Client().updateFromRequest(invoiceRequest.getClient())));
 
         invoiceRequest.getItems().forEach(InvoiceValidator::validateItem);
 
