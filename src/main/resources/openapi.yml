@@ -27,6 +27,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/InvoiceResponse'
   /invoice:
+    get:
+      summary: Get paginated invoices
+      operationId: getInvoices
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 0
+          description: Zero-based page index (0..N)
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          description: The size of the page to be returned
+      responses:
+        "200":
+          description: Paginated invoices
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedInvoiceResponse"
+
     post:
       summary: Create a new invoice
       operationId: createInvoice
@@ -53,9 +77,6 @@ components:
         - invoiceNumber
         - issueDate
         - dueDate
-        - totalNet
-        - totalVat
-        - totalGross
         - client
         - items
       properties:
@@ -73,16 +94,19 @@ components:
           format: double
           minimum: 0
           maximum: 9999999999.99
+          readOnly: true
         totalVat:
           type: number
           format: double
           minimum: 0
           maximum: 9999999999.99
+          readOnly: true
         totalGross:
           type: number
           format: double
           minimum: 0
           maximum: 9999999999.99
+          readOnly: true
         client:
           $ref: '#/components/schemas/ClientRequest'
         items:
@@ -129,12 +153,15 @@ components:
         address:
           type: string
           maxLength: 255
+          readOnly: true
         email:
           type: string
           format: email
+          readOnly: true
         phone:
           type: string
           maxLength: 20
+          readOnly: true
 
     ClientResponse:
       allOf:
@@ -153,19 +180,21 @@ components:
         - description
         - quantity
         - netPrice
-        - vatRate
       properties:
         description:
           type: string
         quantity:
-          type: number
-          format: double
+          type: integer
+          format: int64
+          minimum: 1
         unitPrice:
           type: number
           format: double
         vatRate:
           type: number
           format: double
+          default: 23
+          readOnly: true
         netValue:
           type: number
           format: double
@@ -189,3 +218,19 @@ components:
             id:
               type: integer
               format: int64
+
+    PaginatedInvoiceResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceResponse'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        number:
+          type: integer
+        size:
+          type: integer
