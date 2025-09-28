@@ -27,7 +27,7 @@ public class InvoiceItem {
 
     @NotNull
     @Digits(integer = 12, fraction = 2)
-    private BigDecimal quantity;
+    private Long quantity;
 
     @NotNull
     @Digits(integer = 12, fraction = 2)
@@ -56,7 +56,7 @@ public class InvoiceItem {
     public InvoiceItem updateFromRequest(InvoiceItemRequest request, Invoice invoice) {
         this.invoice = invoice;
         this.description = request.getDescription();
-        this.quantity = BigDecimal.valueOf(request.getQuantity());
+        this.quantity = request.getQuantity();
         this.unitPrice = BigDecimal.valueOf(request.getUnitPrice());
         this.vatRate = BigDecimal.valueOf(request.getVatRate());
         this.netValue = BigDecimal.valueOf(request.getNetValue());
