@@ -68,6 +68,19 @@ paths:
                 schema:
                   type: integer
                   format: int64
+  /client:
+    get:
+      summary: Get clients
+      operationId: getClients
+      responses:
+        "200":
+          description: All clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientResponse'
 
 components:
   schemas:
