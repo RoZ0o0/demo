@@ -9,7 +9,7 @@ tags:
 paths:
   /invoice/{invoiceId}:
     get:
-      description: Get a invoice
+      summary: Get a invoice
       operationId: getInvoice
       parameters:
         - in: path
@@ -82,6 +82,24 @@ paths:
                 items:
                   $ref: '#/components/schemas/ClientResponse'
 
+  /client/exists:
+    get:
+      summary: Check if client NIP exists
+      operationId: checkClientNipExists
+      parameters:
+        - in: query
+          name: nip
+          required: true
+          schema:
+            type: string
+          description: The NIP of the client to check
+      responses:
+        '200':
+          description: Return whether client exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckClientNipExistsResponse'
 components:
   schemas:
     InvoiceRequest:
@@ -247,3 +265,9 @@ components:
           type: integer
         size:
           type: integer
+
+    CheckClientNipExistsResponse:
+      type: object
+      properties:
+        exists:
+          type: boolean

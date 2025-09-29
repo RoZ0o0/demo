@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.api.ClientApi;
+import com.example.demo.models.CheckClientNipExistsResponse;
 import com.example.demo.models.ClientResponse;
 import com.example.demo.service.ClientService;
 import lombok.RequiredArgsConstructor;
@@ -17,5 +18,10 @@ public class ClientController implements ClientApi {
     @Override
     public ResponseEntity<List<ClientResponse>> getClients() {
         return ResponseEntity.ok(clientService.getClients());
+    }
+
+    @Override
+    public ResponseEntity<CheckClientNipExistsResponse> checkClientNipExists(String nip) {
+        return ResponseEntity.ok(clientService.checkNipExists(nip));
     }
 }
