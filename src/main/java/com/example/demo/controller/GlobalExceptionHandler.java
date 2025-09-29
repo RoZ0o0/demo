@@ -1,9 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.exception.InvalidInvoiceDateException;
-import com.example.demo.exception.InvalidInvoiceItemException;
-import com.example.demo.exception.InvoiceNumberExistsException;
-import com.example.demo.exception.InvoiceTotalExceededException;
+import com.example.demo.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,10 +11,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final String ERROR_KEY = "error";
+
+    @ExceptionHandler(InvoiceNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleInvoiceNotFoundException(InvoiceNotFoundException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put(ERROR_KEY, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
 
     @ExceptionHandler(InvoiceNumberExistsException.class)
     public ResponseEntity<Map<String, String>> handleNumberInvoiceExistsException(InvoiceNumberExistsException ex) {
