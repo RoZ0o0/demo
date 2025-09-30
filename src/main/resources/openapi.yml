@@ -1,5 +1,5 @@
 ---
-openapi: 3.1.1
+openapi: 3.1.0
 info:
   title: Invoice management system
   version: 1.0.0
@@ -210,7 +210,7 @@ components:
       required:
         - description
         - quantity
-        - netPrice
+        - unitPrice
       properties:
         description:
           type: string
@@ -259,12 +259,16 @@ components:
             $ref: '#/components/schemas/InvoiceResponse'
         totalElements:
           type: integer
+          format: int64
         totalPages:
           type: integer
+          format: int32
         number:
           type: integer
+          format: int32
         size:
           type: integer
+          format: int32
 
     CheckClientNipExistsResponse:
       type: object
