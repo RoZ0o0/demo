@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.api.InvoiceApi;
 import com.example.demo.models.InvoiceRequest;
 import com.example.demo.models.InvoiceResponse;
+import com.example.demo.models.InvoiceUpdateRequest;
 import com.example.demo.models.PaginatedInvoiceResponse;
 import com.example.demo.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,11 @@ public class InvoiceController implements InvoiceApi {
     public ResponseEntity<Void> deleteInvoice(Long invoiceId) {
         invoiceService.deleteInvoiceById(invoiceId);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Long> updateInvoice(Long invoiceId, InvoiceUpdateRequest invoiceUpdateRequest) {
+        return ResponseEntity.ok(invoiceService.updateInvoiceById(invoiceId, invoiceUpdateRequest));
     }
 
     @Override

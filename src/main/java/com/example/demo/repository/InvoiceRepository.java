@@ -13,6 +13,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice,Long> {
 
     boolean existsByInvoiceNumber(String invoiceNumber);
 
+    boolean existsByInvoiceNumberAndIdNot(String invoiceNumber, Long id);
+
     Optional<Invoice> findByPublicToken(String publicToken);
 
     @Query("SELECT MAX(CAST(SUBSTRING(i.invoiceNumber, LENGTH(:prefix) + 1) AS int)) " +

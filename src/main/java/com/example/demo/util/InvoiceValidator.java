@@ -3,6 +3,7 @@ package com.example.demo.util;
 import com.example.demo.exception.InvalidInvoiceDateException;
 import com.example.demo.exception.InvalidInvoiceItemException;
 import com.example.demo.models.InvoiceItemRequest;
+import com.example.demo.models.InvoiceItemUpdateRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,6 +14,17 @@ public class InvoiceValidator {
 
     private static final BigDecimal MAX_UNIT_PRICE = BigDecimal.valueOf(99999999.99);
     private static final long MAX_QUANTITY = 9999999999L;
+
+    public static void validateUpdateItems(List<InvoiceItemUpdateRequest> items) {
+        List<InvoiceItemRequest> invoiceItemRequests = items.stream()
+                .map(i -> new InvoiceItemRequest()
+                            .description(i.getDescription())
+                            .quantity(i.getQuantity())
+                            .unitPrice(i.getUnitPrice()))
+                .toList();
+
+        validateItems(invoiceItemRequests);
+    }
 
     public static void validateItems(List<InvoiceItemRequest> items) {
         for (InvoiceItemRequest item : items) {

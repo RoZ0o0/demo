@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.example.demo.models.InvoiceItemRequest;
+import com.example.demo.models.InvoiceItemUpdateRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
@@ -55,6 +56,17 @@ public class InvoiceItem {
     private Invoice invoice;
 
     public InvoiceItem updateFromRequest(InvoiceItemRequest request, Invoice invoice) {
+        this.invoice = invoice;
+        this.description = request.getDescription();
+        this.quantity = request.getQuantity();
+        this.unitPrice = BigDecimal.valueOf(request.getUnitPrice());
+        this.vatRate = BigDecimal.valueOf(request.getVatRate());
+
+        recalculateTotals();
+        return this;
+    }
+
+    public InvoiceItem updateFromUpdateRequest(InvoiceItemUpdateRequest request, Invoice invoice) {
         this.invoice = invoice;
         this.description = request.getDescription();
         this.quantity = request.getQuantity();

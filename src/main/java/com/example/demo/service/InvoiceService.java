@@ -5,19 +5,19 @@ import com.example.demo.entity.Invoice;
 import com.example.demo.exception.InvoiceNotFoundException;
 import com.example.demo.exception.InvoiceNumberExistsException;
 import com.example.demo.mapper.InvoiceMapper;
-import com.example.demo.models.InvoiceRequest;
-import com.example.demo.models.InvoiceResponse;
-import com.example.demo.models.PaginatedInvoiceResponse;
+import com.example.demo.models.*;
 import com.example.demo.repository.ClientRepository;
 import com.example.demo.repository.InvoiceRepository;
 import com.example.demo.util.InvoiceValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,19 +37,28 @@ public class InvoiceService {
     public Long createInvoice(InvoiceRequest invoiceRequest) {
         InvoiceValidator.validateDates(invoiceRequest.getIssueDate(), invoiceRequest.getDueDate());
         InvoiceValidator.validateItems(invoiceRequest.getItems());
-        Client client = resolveClient(invoiceRequest);
+        Client client = resolveClient(invoiceRequest.getClient());
 
         Invoice invoice = new Invoice().updateFromRequest(invoiceRequest, client);
 
-        String invoiceNumber = resolveInvoiceNumber(invoiceRequest);
-        invoice.setInvoiceNumber(invoiceNumber);
+        String invoiceNumber = invoice.getInvoiceNumber();
+
+        if (!invoiceNumber.isBlank()) {
+            if (invoiceRepository.existsByInvoiceNumber(invoiceNumber)) {
+                throw new InvoiceNumberExistsException(invoice.getInvoiceNumber());
+            }
+        } else {
+            invoiceNumber = generateInvoiceNumber(invoice.getIssueDate());
+            invoice.setInvoiceNumber(invoiceNumber);
+        }
 
         return invoiceRepository.save(invoice).getId();
     }
 
     public PaginatedInvoiceResponse getInvoicesPaginated(Integer page, Integer size) {
         Pageable pageable = PageRequest.of(page, size);
-        return invoiceMapper.toResponse(invoiceRepository.findAll(pageable));
+        Page<Invoice> invoice = invoiceRepository.findAll(pageable);
+        return invoiceMapper.toResponse(invoice);
     }
 
     public void deleteInvoiceById(Long invoiceId) {
@@ -60,23 +69,40 @@ public class InvoiceService {
         invoiceRepository.deleteById(invoiceId);
     }
 
+    @Transactional
+    public Long updateInvoiceById(Long invoiceId, InvoiceUpdateRequest invoiceUpdateRequest) {
+        Optional<Invoice> optionalInvoice = invoiceRepository.findById(invoiceId);
+
+        if (optionalInvoice.isEmpty()) {
+            throw new InvoiceNotFoundException(invoiceId);
+        }
+
+        Invoice invoice = optionalInvoice.get();
+
+        InvoiceValidator.validateDates(invoiceUpdateRequest.getIssueDate(), invoiceUpdateRequest.getDueDate());
+        InvoiceValidator.validateUpdateItems(invoiceUpdateRequest.getItems());
+        Client client = resolveClient(invoiceUpdateRequest.getClient());
+
+        invoice.updateFromUpdateRequest(invoiceUpdateRequest, client);
+
+        String requestedNumber = invoiceUpdateRequest.getInvoiceNumber();
+
+        if (!requestedNumber.isBlank()) {
+            if (invoiceRepository.existsByInvoiceNumberAndIdNot(requestedNumber, invoiceId)) {
+                throw new InvoiceNumberExistsException(requestedNumber);
+            }
+            invoice.setInvoiceNumber(requestedNumber);
+        } else {
+            invoice.setInvoiceNumber(generateInvoiceNumber(invoice.getIssueDate()));
+        }
+
+        return invoiceRepository.save(invoice).getId();
+    }
+
     public InvoiceResponse getInvoiceByPublicToken(String publicToken) {
         Invoice invoice = invoiceRepository.findByPublicToken(publicToken)
                 .orElseThrow(() -> new InvoiceNotFoundException(publicToken));
         return invoiceMapper.toResponse(invoice);
-    }
-
-    private String resolveInvoiceNumber (InvoiceRequest invoiceRequest) {
-        String invoiceNumber = invoiceRequest.getInvoiceNumber();
-
-        if (!invoiceNumber.isBlank()) {
-            if (invoiceRepository.existsByInvoiceNumber(invoiceNumber)) {
-                throw new InvoiceNumberExistsException(invoiceNumber);
-            }
-            return invoiceNumber;
-        }
-
-        return generateInvoiceNumber(invoiceRequest.getIssueDate());
     }
 
     private String generateInvoiceNumber (LocalDate invoiceDate) {
@@ -92,10 +118,10 @@ public class InvoiceService {
         return prefix + String.format("%05d", nextNumber);
     }
 
-    private Client resolveClient(InvoiceRequest invoiceRequest) {
-        String nip = invoiceRequest.getClient().getNip();
+    private Client resolveClient(ClientRequest clientRequest) {
+        String nip = clientRequest.getNip();
 
         return clientRepository.findByNip(nip)
-                .orElseGet(() -> clientRepository.save(new Client().updateFromRequest(invoiceRequest.getClient())));
+                .orElseGet(() -> clientRepository.save(new Client().updateFromRequest(clientRequest)));
     }
 }

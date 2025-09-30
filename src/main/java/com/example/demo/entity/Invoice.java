@@ -1,6 +1,8 @@
 package com.example.demo.entity;
 
+import com.example.demo.models.InvoiceItemUpdateRequest;
 import com.example.demo.models.InvoiceRequest;
+import com.example.demo.models.InvoiceUpdateRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotEmpty;
@@ -12,8 +14,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Builder
 @Entity
@@ -66,15 +69,51 @@ public class Invoice {
     private OffsetDateTime createdAt;
 
 
-    public Invoice updateFromRequest(InvoiceRequest request, Client client) {
-        this.issueDate = request.getIssueDate();
-        this.dueDate = request.getDueDate();
-        this.client = client.updateFromRequest(request.getClient());
-        this.items = request.getItems().stream()
+    public Invoice updateFromRequest(InvoiceRequest invoiceRequest, Client client) {
+        this.invoiceNumber = invoiceRequest.getInvoiceNumber();
+        this.issueDate = invoiceRequest.getIssueDate();
+        this.dueDate = invoiceRequest.getDueDate();
+        this.client = client.updateFromRequest(invoiceRequest.getClient());
+        this.items = invoiceRequest.getItems().stream()
                 .map(itemReq -> new InvoiceItem().updateFromRequest(itemReq, this))
                 .toList();
         recalculateTotals();
         return this;
+    }
+
+    public void updateFromUpdateRequest(InvoiceUpdateRequest invoiceUpdateRequest, Client client) {
+        this.issueDate = invoiceUpdateRequest.getIssueDate();
+        this.dueDate = invoiceUpdateRequest.getDueDate();
+        this.client = client.updateFromRequest(invoiceUpdateRequest.getClient());
+        updateInvoiceItems(invoiceUpdateRequest.getItems());
+        recalculateTotals();
+    }
+
+    private void updateInvoiceItems(List<InvoiceItemUpdateRequest> itemRequests) {
+        Map<Long, InvoiceItem> existingItemsMap = this.items.stream()
+                .filter(i -> i.getId() != null)
+                .collect(Collectors.toMap(InvoiceItem::getId, Function.identity()));
+
+        Set<Long> updatedIds = new HashSet<>();
+        List<InvoiceItem> newItems = new ArrayList<>();
+
+        for (InvoiceItemUpdateRequest itemReq : itemRequests) {
+            if (itemReq.getId() != null) {
+                InvoiceItem existingItem = existingItemsMap.get(itemReq.getId());
+                if (existingItem == null) {
+                    throw new IllegalArgumentException("Item with ID " + itemReq.getId() + " not found in invoice.");
+                }
+                existingItem.updateFromUpdateRequest(itemReq, this);
+                updatedIds.add(itemReq.getId());
+            } else {
+                InvoiceItem newItem = new InvoiceItem().updateFromUpdateRequest(itemReq, this);
+                newItems.add(newItem);
+            }
+        }
+
+        this.items.removeIf(item -> item.getId() != null && !updatedIds.contains(item.getId()));
+
+        this.items.addAll(newItems);
     }
 
     private void recalculateTotals() {
