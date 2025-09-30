@@ -182,6 +182,8 @@ components:
             id:
               type: integer
               format: int64
+            publicToken:
+              type: string
             createdAt:
               type: string
               format: date-time
