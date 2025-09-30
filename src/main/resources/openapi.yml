@@ -56,6 +56,39 @@ paths:
           description: Invoice not found
         '500':
           description: Internal server error
+    put:
+      summary: Update an existing invoice
+      operationId: updateInvoice
+      tags:
+        - Invoice
+      parameters:
+        - name: invoiceId
+          in: path
+          description: ID of the invoice to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvoiceUpdateRequest'
+      responses:
+        '200':
+          description: Successfully updated invoice
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        '400':
+          description: Invalid request payload
+        '404':
+          description: Invoice not found
+        '500':
+          description: Internal server error
 
   /invoice/{publicToken}/preview:
     get:
@@ -200,6 +233,41 @@ paths:
         '500':
           description: Internal server error
 
+  /client/{clientId}:
+    put:
+      summary: Update an existing client
+      operationId: updateClient
+      tags:
+        - Client
+      parameters:
+        - name: clientId
+          in: path
+          description: ID of the client to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRequest'
+      responses:
+        '200':
+          description: Successfully updated client
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+        '400':
+          description: Invalid request payload
+        '404':
+          description: Client not found
+        '500':
+          description: Internal server error
+
   /client/exists:
     get:
       summary: Check if client NIP exists
@@ -302,6 +370,16 @@ components:
           format: double
           readOnly: true
 
+    InvoiceItemUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceItemRequest'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+              description: Only for existing items
+
     InvoiceItemResponse:
       allOf:
         - $ref: '#/components/schemas/InvoiceItemRequest'
@@ -356,6 +434,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvoiceItemRequest'
+
+    InvoiceUpdateRequest:
+      type: object
+      required:
+        - invoiceNumber
+        - issueDate
+        - dueDate
+        - client
+        - items
+      properties:
+        invoiceNumber:
+          type: string
+          maxLength: 50
+          example: "FV/2025/01/01/00001"
+        issueDate:
+          type: string
+          format: date
+          example: "2025-09-30"
+        dueDate:
+          type: string
+          format: date
+          example: "2025-10-30"
+        totalNet:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 9999999999.99
+          readOnly: true
+        totalVat:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 9999999999.99
+          readOnly: true
+        totalGross:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 9999999999.99
+          readOnly: true
+        client:
+          $ref: '#/components/schemas/ClientRequest'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItemUpdateRequest'
 
     InvoiceResponse:
       allOf:
