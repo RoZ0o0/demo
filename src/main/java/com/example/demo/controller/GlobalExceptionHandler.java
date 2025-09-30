@@ -1,6 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.exception.*;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 @RestControllerAdvice
@@ -31,7 +34,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
-    @ExceptionHandler({InvalidInvoiceItemException.class, InvoiceTotalExceededException.class, InvalidInvoiceDateException.class})
+    @ExceptionHandler({InvalidInvoiceItemException.class, InvalidInvoiceDateException.class})
     public ResponseEntity<Map<String, String>> handleInvoiceValidation(Exception ex) {
         Map<String, String> error = new HashMap<>();
         error.put(ERROR_KEY, ex.getMessage());
@@ -52,5 +55,13 @@ public class GlobalExceptionHandler {
                 errors.put(error.getField(), error.getDefaultMessage())
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstrainViolationException(ConstraintViolationException ex) {
+        Map<String, String> error = ex.getConstraintViolations().stream()
+                        .collect(Collectors.toMap(cv -> cv.getPropertyPath().toString(),
+                                ConstraintViolation::getMessage));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 }
