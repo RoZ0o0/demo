@@ -69,6 +69,7 @@ class InvoiceControllerIntegrationTest {
 
         Invoice invoice = Invoice.builder()
                 .invoiceNumber("FV/2025/01/01/00001")
+                .publicToken("f47ac10b-58cc-4372-a567-0e02b2c3d479")
                 .issueDate(LocalDate.now())
                 .dueDate(LocalDate.now().plusDays(1))
                 .totalNet(BigDecimal.valueOf(400))
