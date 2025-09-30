@@ -103,6 +103,12 @@
 			<artifactId>mapstruct</artifactId>
 			<version>1.6.3</version>
 		</dependency>
+		<dependency>
+			<groupId>io.rest-assured</groupId>
+			<artifactId>rest-assured</artifactId>
+			<version>5.5.6</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -161,6 +167,40 @@
 								<interfaceOnly>true</interfaceOnly>
 								<useJakartaEe>true</useJakartaEe>
 							</configOptions>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.6.1</version>
+				<executions>
+					<execution>
+						<id>add-test-source</id>
+						<phase>generate-test-sources</phase>
+						<goals>
+							<goal>add-test-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.basedir}/src/test/integration/java</source>
+								<source>${project.basedir}/src/test/unit/java</source>
+							</sources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>add-integration-test-resources</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>add-test-resource</goal>
+						</goals>
+						<configuration>
+							<resources>
+								<resource>
+									<directory>src/test/integration/resources</directory>
+								</resource>
+							</resources>
 						</configuration>
 					</execution>
 				</executions>
