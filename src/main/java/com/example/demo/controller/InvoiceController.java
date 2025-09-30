@@ -33,4 +33,9 @@ public class InvoiceController implements InvoiceApi {
     ) {
         return ResponseEntity.ok(invoiceService.getInvoicesPaginated(page, size));
     }
+
+    @Override
+    public ResponseEntity<InvoiceResponse> getInvoiceByPublicToken(String publicToken) {
+        return ResponseEntity.ok(invoiceService.getInvoiceByPublicToken(publicToken));
+    }
 }

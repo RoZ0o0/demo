@@ -6,10 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice,Long> {
 
     boolean existsByInvoiceNumber(String invoiceNumber);
+
+    Optional<Invoice> findByPublicToken(String publicToken);
 
     @Query("SELECT MAX(CAST(SUBSTRING(i.invoiceNumber, LENGTH(:prefix) + 1) AS int)) " +
             "FROM Invoice i WHERE i.invoiceNumber LIKE :prefix%")

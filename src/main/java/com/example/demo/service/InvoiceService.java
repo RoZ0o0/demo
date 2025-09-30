@@ -52,6 +52,12 @@ public class InvoiceService {
         return invoiceMapper.toResponse(invoiceRepository.findAll(pageable));
     }
 
+    public InvoiceResponse getInvoiceByPublicToken(String publicToken) {
+        Invoice invoice = invoiceRepository.findByPublicToken(publicToken)
+                .orElseThrow(() -> new InvoiceNotFoundException(publicToken));
+        return invoiceMapper.toResponse(invoice);
+    }
+
     private String resolveInvoiceNumber (InvoiceRequest invoiceRequest) {
         String invoiceNumber = invoiceRequest.getInvoiceNumber();
 
