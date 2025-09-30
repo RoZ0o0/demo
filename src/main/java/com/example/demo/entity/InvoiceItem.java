@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @AllArgsConstructor
@@ -59,9 +60,14 @@ public class InvoiceItem {
         this.quantity = request.getQuantity();
         this.unitPrice = BigDecimal.valueOf(request.getUnitPrice());
         this.vatRate = BigDecimal.valueOf(request.getVatRate());
-        this.netValue = BigDecimal.valueOf(request.getNetValue());
-        this.vatValue = BigDecimal.valueOf(request.getVatValue());
-        this.grossValue = BigDecimal.valueOf(request.getGrossValue());
+
+        recalculateTotals();
         return this;
+    }
+
+    private void recalculateTotals() {
+        this.netValue = unitPrice.multiply(BigDecimal.valueOf(quantity)).setScale(2, RoundingMode.HALF_UP);
+        this.vatValue = netValue.multiply(vatRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        this.grossValue = netValue.add(vatValue).setScale(2, RoundingMode.HALF_UP);
     }
 }

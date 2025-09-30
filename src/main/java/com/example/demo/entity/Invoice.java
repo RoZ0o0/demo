@@ -3,15 +3,15 @@ package com.example.demo.entity;
 import com.example.demo.models.InvoiceRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 
 @Builder
@@ -31,10 +31,10 @@ public class Invoice {
     private String invoiceNumber;
 
     @NotNull
-    private Date issueDate;
+    private LocalDate issueDate;
 
     @NotNull
-    private Date dueDate;
+    private LocalDate dueDate;
 
     @NotNull
     @Digits(integer = 10, fraction = 2)
@@ -53,7 +53,9 @@ public class Invoice {
     @JoinColumn(name="client_id", nullable = false)
     private Client client;
 
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @NotNull
+    @NotEmpty(message = "Invoice must have at least one item")
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<InvoiceItem> items;
 
     @CreationTimestamp
@@ -61,15 +63,25 @@ public class Invoice {
 
 
     public Invoice updateFromRequest(InvoiceRequest request, Client client) {
-        this.issueDate = Date.from(request.getIssueDate().atStartOfDay(ZoneOffset.UTC).toInstant());this.dueDate = Date.from(request.getDueDate().atStartOfDay(ZoneOffset.UTC).toInstant());
-        this.totalNet = BigDecimal.valueOf(request.getTotalNet());
-        this.totalVat = BigDecimal.valueOf(request.getTotalVat());
-        this.totalGross = BigDecimal.valueOf(request.getTotalGross());
+        this.issueDate = request.getIssueDate();
+        this.dueDate = request.getDueDate();
         this.client = client.updateFromRequest(request.getClient());
         this.items = request.getItems().stream()
                 .map(itemReq -> new InvoiceItem().updateFromRequest(itemReq, this))
                 .toList();
-
+        recalculateTotals();
         return this;
+    }
+
+    private void recalculateTotals() {
+        this.totalNet = items.stream()
+                .map(InvoiceItem::getNetValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.totalVat = items.stream()
+                .map(InvoiceItem::getVatValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        this.totalGross = items.stream()
+                .map(InvoiceItem::getGrossValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

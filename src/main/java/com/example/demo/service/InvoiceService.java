@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.entity.Client;
 import com.example.demo.entity.Invoice;
-import com.example.demo.entity.InvoiceItem;
 import com.example.demo.exception.InvoiceNotFoundException;
 import com.example.demo.exception.InvoiceNumberExistsException;
 import com.example.demo.mapper.InvoiceMapper;
@@ -11,7 +10,6 @@ import com.example.demo.models.InvoiceResponse;
 import com.example.demo.models.PaginatedInvoiceResponse;
 import com.example.demo.repository.ClientRepository;
 import com.example.demo.repository.InvoiceRepository;
-import com.example.demo.util.InvoiceCalculator;
 import com.example.demo.util.InvoiceValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -19,11 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.util.Date;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,30 +35,14 @@ public class InvoiceService {
 
     @Transactional
     public Long createInvoice(InvoiceRequest invoiceRequest) {
-        String invoiceNumber = resolveInvoiceNumber(invoiceRequest);
-        Client client = resolveClient(invoiceRequest);
-        List<InvoiceItem> items = prepareInvoiceItems(invoiceRequest);
-
-        BigDecimal totalNet = InvoiceCalculator.sumNet(items);
-        BigDecimal totalVat = InvoiceCalculator.sumVat(items);
-        BigDecimal totalGross = InvoiceCalculator.sumGross(items);
-
-        InvoiceValidator.validateTotals(totalNet, totalVat, totalGross);
-
         InvoiceValidator.validateDates(invoiceRequest.getIssueDate(), invoiceRequest.getDueDate());
+        InvoiceValidator.validateItems(invoiceRequest.getItems());
+        Client client = resolveClient(invoiceRequest);
 
-        Invoice invoice = Invoice.builder()
-                .invoiceNumber(invoiceNumber)
-                .issueDate(Date.from(invoiceRequest.getIssueDate().atStartOfDay(ZoneOffset.UTC).toInstant()))
-                .dueDate(Date.from(invoiceRequest.getDueDate().atStartOfDay(ZoneOffset.UTC).toInstant()))
-                .client(client)
-                .totalNet(totalNet)
-                .totalVat(totalVat)
-                .totalGross(totalGross)
-                .items(items)
-                .build();
+        Invoice invoice = new Invoice().updateFromRequest(invoiceRequest, client);
 
-        items.forEach(item -> item.setInvoice(invoice));
+        String invoiceNumber = resolveInvoiceNumber(invoiceRequest);
+        invoice.setInvoiceNumber(invoiceNumber);
 
         return invoiceRepository.save(invoice).getId();
     }
@@ -105,13 +83,5 @@ public class InvoiceService {
 
         return clientRepository.findByNip(nip)
                 .orElseGet(() -> clientRepository.save(new Client().updateFromRequest(invoiceRequest.getClient())));
-    }
-
-    private List<InvoiceItem> prepareInvoiceItems(InvoiceRequest invoiceRequest) {
-        invoiceRequest.getItems().forEach(InvoiceValidator::validateItem);
-
-        return invoiceRequest.getItems().stream()
-                .map(InvoiceCalculator::calculateItem)
-                .toList();
     }
 }
