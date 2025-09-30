@@ -2,13 +2,12 @@ package com.example.demo.controller;
 
 import com.example.demo.api.ClientApi;
 import com.example.demo.models.CheckClientNipExistsResponse;
-import com.example.demo.models.ClientResponse;
+import com.example.demo.models.PaginatedClientResponse;
 import com.example.demo.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
@@ -16,8 +15,11 @@ public class ClientController implements ClientApi {
     private final ClientService clientService;
 
     @Override
-    public ResponseEntity<List<ClientResponse>> getClients() {
-        return ResponseEntity.ok(clientService.getClients());
+    public ResponseEntity<PaginatedClientResponse> getClients(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(required = false) Integer size
+    ) {
+        return ResponseEntity.ok(clientService.getClientsPaginated(page, size));
     }
 
     @Override

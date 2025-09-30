@@ -1,5 +1,5 @@
 ---
-openapi: 3.1.0
+openapi: 3.0.0
 info:
   title: Invoice management system
   version: 1.0.0
@@ -70,17 +70,28 @@ paths:
                   format: int64
   /client:
     get:
-      summary: Get clients
+      summary: Get paginated clients
       operationId: getClients
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 0
+          description: Zero-based page index (0..N)
+        - in: query
+          name: size
+          schema:
+            type: integer
+            minimum: 1
+          description: The size of the page to be returned
       responses:
         "200":
-          description: All clients
+          description: Paginated clients
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ClientResponse'
+                $ref: '#/components/schemas/PaginatedClientResponse'
 
   /client/exists:
     get:
@@ -150,11 +161,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/InvoiceRequest'
         - type: object
-          required:
-            - id
-            - createdAt
-            - client
-            - items
           properties:
             id:
               type: integer
@@ -177,9 +183,11 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
           maxLength: 255
         nip:
           type: string
+          minLength: 1
           maxLength: 20
         address:
           type: string
@@ -198,8 +206,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/ClientRequest'
         - type: object
-          required:
-            - id
           properties:
             id:
               type: integer
@@ -243,8 +249,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/InvoiceItemRequest'
         - type: object
-          required:
-            - id
           properties:
             id:
               type: integer
@@ -257,6 +261,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/InvoiceResponse'
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        number:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+
+    PaginatedClientResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientResponse'
         totalElements:
           type: integer
           format: int64

@@ -1,14 +1,12 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.Client;
 import com.example.demo.mapper.ClientMapper;
-import com.example.demo.models.CheckClientNipExistsResponse;
-import com.example.demo.models.ClientResponse;
+import com.example.demo.models.*;
 import com.example.demo.repository.ClientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,9 +14,12 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final ClientMapper clientMapper;
 
-    public List<ClientResponse> getClients() {
-        List<Client> clientResponses = clientRepository.findAll();
-        return clientMapper.toResponse(clientResponses);
+    private static final int MAX_CLIENT_LIMIT = 10000;
+
+    public PaginatedClientResponse getClientsPaginated(Integer page, Integer size) {
+        Pageable pageable;
+        pageable = size == null ? PageRequest.of(page, MAX_CLIENT_LIMIT) : PageRequest.of(page, size);
+        return clientMapper.toResponse(clientRepository.findAll(pageable));
     }
 
     public CheckClientNipExistsResponse checkNipExists(String nip) {
