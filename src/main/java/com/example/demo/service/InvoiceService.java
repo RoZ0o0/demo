@@ -52,6 +52,14 @@ public class InvoiceService {
         return invoiceMapper.toResponse(invoiceRepository.findAll(pageable));
     }
 
+    public void deleteInvoiceById(Long invoiceId) {
+        if (!invoiceRepository.existsById(invoiceId)) {
+            throw new InvoiceNotFoundException(invoiceId);
+        }
+
+        invoiceRepository.deleteById(invoiceId);
+    }
+
     public InvoiceResponse getInvoiceByPublicToken(String publicToken) {
         Invoice invoice = invoiceRepository.findByPublicToken(publicToken)
                 .orElseThrow(() -> new InvoiceNotFoundException(publicToken));

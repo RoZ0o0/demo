@@ -26,6 +26,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvoiceResponse'
+    delete:
+      summary: Delete invoice by id
+      operationId: deleteInvoice
+      parameters:
+        - in: path
+          name: invoiceId
+          description: Id of the invoice
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Successfully deleted the invoice
+        '404':
+          description: Invoice not found
 
   /invoice/{publicToken}/preview:
     get:

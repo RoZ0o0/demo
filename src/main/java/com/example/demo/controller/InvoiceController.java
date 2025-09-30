@@ -27,6 +27,12 @@ public class InvoiceController implements InvoiceApi {
     }
 
     @Override
+    public ResponseEntity<Void> deleteInvoice(Long invoiceId) {
+        invoiceService.deleteInvoiceById(invoiceId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     public ResponseEntity<PaginatedInvoiceResponse> getInvoices(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "20") Integer size
