@@ -3,13 +3,17 @@ package com.example.demo.service;
 import com.example.demo.entity.Client;
 import com.example.demo.mapper.ClientMapper;
 import com.example.demo.models.CheckClientNipExistsResponse;
-import com.example.demo.models.ClientResponse;
+import com.example.demo.models.PaginatedClientResponse;
 import com.example.demo.repository.ClientRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -28,24 +32,24 @@ class ClientServiceTest {
     private ClientMapper clientMapper;
 
     @Test
-    void getClients_shouldReturnResponses() {
+    void getClientsPaginated_shouldReturnPaginatedResponses() {
+        Pageable pageable = PageRequest.of(0, 2);
         Client client1 = Client.builder().id(1L).build();
         Client client2 = Client.builder().id(2L).build();
+
         List<Client> clientList = List.of(client1, client2);
+        Page<Client> clientPage = new PageImpl<>(clientList, pageable, clientList.size());
 
-        when(clientRepository.findAll()).thenReturn(clientList);
+        when(clientRepository.findAll(pageable)).thenReturn(clientPage);
 
-        List<ClientResponse> mockResponse = List.of(
-                new ClientResponse().id(client1.getId()),
-                new ClientResponse().id(client2.getId())
-        );
+        PaginatedClientResponse mockResponse = new PaginatedClientResponse();
+        mockResponse.totalElements(2L);
+        when(clientMapper.toResponse(clientPage)).thenReturn(mockResponse);
 
-        when(clientMapper.toResponse(clientList)).thenReturn(mockResponse);
-
-        List<ClientResponse> response = clientService.getClients();
+        PaginatedClientResponse response = clientService.getClientsPaginated(0, 2);
 
         assertNotNull(response);
-        assertEquals(2L, response.size());
+        assertEquals(2L, response.getTotalElements());
     }
 
     @Test

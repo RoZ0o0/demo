@@ -69,11 +69,14 @@ class ClientControllerIntegrationTest {
         clientRepository.deleteAll();
 
         givenURL()
+            .param("page", "0")
+            .param("size", "10")
         .when()
             .get("/client")
         .then()
             .statusCode(HttpStatus.OK.value())
-            .body("size()", equalTo(0));
+            .body("content", is(empty()))
+            .body("totalElements", equalTo(0));
     }
 
     @Test
@@ -87,11 +90,14 @@ class ClientControllerIntegrationTest {
                 .build());
 
         givenURL()
+            .param("page", "0")
+            .param("size", "20")
         .when()
             .get("/client")
         .then()
             .statusCode(HttpStatus.OK.value())
-            .body("size()", equalTo(2));
+            .body("content", is(not(empty())))
+            .body("totalElements", equalTo(2));
     }
 
     @Test
