@@ -64,4 +64,11 @@ public class GlobalExceptionHandler {
                                 ConstraintViolation::getMessage));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<Map<String, String>> handleNipAlreadyExistsException(NipAlreadyExistsException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put(ERROR_KEY, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
 }
