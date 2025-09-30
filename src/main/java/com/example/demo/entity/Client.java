@@ -1,10 +1,8 @@
 package com.example.demo.entity;
 
 import com.example.demo.models.ClientRequest;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -25,10 +23,12 @@ public class Client {
     private Long id;
 
     @NotNull
+    @NotBlank
     @Size(max = 255)
     private String name;
 
     @NotNull
+    @NotBlank
     @Size(max = 20)
     private String nip;
 
@@ -45,11 +45,15 @@ public class Client {
     private OffsetDateTime createdAt;
 
     public Client updateFromRequest(ClientRequest request) {
-        this.name = request.getName();
-        this.nip = request.getNip();
-        this.email = request.getEmail();
-        this.phone = request.getPhone();
-        this.address = request.getAddress();
+        this.name = request.getName().trim();
+        this.nip = request.getNip().trim();
+        this.email = normalize(request.getEmail());
+        this.phone = normalize(request.getPhone());
+        this.address = normalize(request.getAddress());
         return this;
+    }
+
+    private String normalize(String value) {
+        return (value == null || value.trim().isEmpty()) ? null : value.trim();
     }
 }
