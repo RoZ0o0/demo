@@ -26,6 +26,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvoiceResponse'
+
+  /invoice/{publicToken}/preview:
+    get:
+      summary: Get invoice by public token
+      operationId: getInvoiceByPublicToken
+      parameters:
+        - in: path
+          name: publicToken
+          description: Public token of the invoice
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully fetched the invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceResponse'
+
   /invoice:
     get:
       summary: Get paginated invoices
