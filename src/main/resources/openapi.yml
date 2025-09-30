@@ -1,16 +1,18 @@
----
 openapi: 3.0.0
 info:
-  title: Invoice management system
-  version: 1.0.0
+  title: Invoice Management System
+  version: 1.0.1
   description: Demo application to manage invoices
 tags:
   - name: Invoice
+  - name: Client
 paths:
   /invoice/{invoiceId}:
     get:
-      summary: Get a invoice
+      summary: Get an invoice
       operationId: getInvoice
+      tags:
+        - Invoice
       parameters:
         - in: path
           name: invoiceId
@@ -26,9 +28,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvoiceResponse'
+        '400':
+          description: Invalid invoice ID supplied
+        '404':
+          description: Invoice not found
+        '500':
+          description: Internal server error
     delete:
       summary: Delete invoice by id
       operationId: deleteInvoice
+      tags:
+        - Invoice
       parameters:
         - in: path
           name: invoiceId
@@ -40,13 +50,19 @@ paths:
       responses:
         '204':
           description: Successfully deleted the invoice
+        '400':
+          description: Invalid invoice ID supplied
         '404':
           description: Invoice not found
+        '500':
+          description: Internal server error
 
   /invoice/{publicToken}/preview:
     get:
       summary: Get invoice by public token
       operationId: getInvoiceByPublicToken
+      tags:
+        - Invoice
       parameters:
         - in: path
           name: publicToken
@@ -61,11 +77,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InvoiceResponse'
+        '404':
+          description: Invoice not found
+        '400':
+          description: Invalid token supplied
+        '500':
+          description: Internal server error
 
   /invoice:
     get:
       summary: Get paginated invoices
       operationId: getInvoices
+      tags:
+        - Invoice
       parameters:
         - in: query
           name: page
@@ -80,16 +104,22 @@ paths:
             minimum: 1
           description: The size of the page to be returned
       responses:
-        "200":
+        '200':
           description: Paginated invoices
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaginatedInvoiceResponse"
+        '400':
+          description: Invalid query parameters
+        '500':
+          description: Internal server error
 
     post:
       summary: Create a new invoice
       operationId: createInvoice
+      tags:
+        - Invoice
       requestBody:
         required: true
         content:
@@ -101,36 +131,54 @@ paths:
           description: Successfully created invoice
           content:
             application/json:
-                schema:
-                  type: integer
-                  format: int64
+              schema:
+                type: integer
+                format: int64
+        '400':
+          description: Invalid request payload
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+
   /client:
     get:
       summary: Get paginated clients
       operationId: getClients
+      tags:
+        - Client
       parameters:
         - in: query
           name: page
+          required: true
           schema:
             type: integer
             minimum: 0
           description: Zero-based page index (0..N)
         - in: query
           name: size
+          required: false
           schema:
             type: integer
             minimum: 1
           description: The size of the page to be returned
       responses:
-        "200":
+        '200':
           description: Paginated clients
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedClientResponse'
+        '400':
+          description: Invalid query parameters
+        '500':
+          description: Internal server error
+
     post:
       summary: Create a new client
       operationId: createClient
+      tags:
+        - Client
       requestBody:
         required: true
         content:
@@ -145,11 +193,19 @@ paths:
               schema:
                 type: integer
                 format: int64
+        '400':
+          description: Invalid request payload
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
 
   /client/exists:
     get:
       summary: Check if client NIP exists
       operationId: checkClientNipExists
+      tags:
+        - Client
       parameters:
         - in: query
           name: nip
@@ -164,72 +220,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CheckClientNipExistsResponse'
+        '400':
+          description: Invalid NIP supplied
+        '500':
+          description: Internal server error
+
 components:
   schemas:
-    InvoiceRequest:
-      type: object
-      required:
-        - invoiceNumber
-        - issueDate
-        - dueDate
-        - client
-        - items
-      properties:
-        invoiceNumber:
-          type: string
-          maxLength: 50
-        issueDate:
-          type: string
-          format: date
-        dueDate:
-          type: string
-          format: date
-        totalNet:
-          type: number
-          format: double
-          minimum: 0
-          maximum: 9999999999.99
-          readOnly: true
-        totalVat:
-          type: number
-          format: double
-          minimum: 0
-          maximum: 9999999999.99
-          readOnly: true
-        totalGross:
-          type: number
-          format: double
-          minimum: 0
-          maximum: 9999999999.99
-          readOnly: true
-        client:
-          $ref: '#/components/schemas/ClientRequest'
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/InvoiceItemRequest'
-
-
-    InvoiceResponse:
-      allOf:
-        - $ref: '#/components/schemas/InvoiceRequest'
-        - type: object
-          properties:
-            id:
-              type: integer
-              format: int64
-            publicToken:
-              type: string
-            createdAt:
-              type: string
-              format: date-time
-            client:
-              $ref: '#/components/schemas/ClientResponse'
-            items:
-              type: array
-              items:
-                $ref: '#/components/schemas/InvoiceItemResponse'
-
     ClientRequest:
       type: object
       required:
@@ -240,10 +237,12 @@ components:
           type: string
           minLength: 1
           maxLength: 255
+          example: "Acme Corp"
         nip:
           type: string
           minLength: 1
           maxLength: 20
+          example: "1234567890"
         address:
           type: string
           maxLength: 255
@@ -275,13 +274,16 @@ components:
       properties:
         description:
           type: string
+          example: "Web development services"
         quantity:
           type: integer
           format: int64
           minimum: 1
+          example: 10
         unitPrice:
           type: number
           format: double
+          example: 100.0
         vatRate:
           type: number
           format: double
@@ -308,6 +310,72 @@ components:
             id:
               type: integer
               format: int64
+
+    InvoiceRequest:
+      type: object
+      required:
+        - invoiceNumber
+        - issueDate
+        - dueDate
+        - client
+        - items
+      properties:
+        invoiceNumber:
+          type: string
+          maxLength: 50
+          example: "FV/2025/01/01/00001"
+        issueDate:
+          type: string
+          format: date
+          example: "2025-09-30"
+        dueDate:
+          type: string
+          format: date
+          example: "2025-10-30"
+        totalNet:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 9999999999.99
+          readOnly: true
+        totalVat:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 9999999999.99
+          readOnly: true
+        totalGross:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 9999999999.99
+          readOnly: true
+        client:
+          $ref: '#/components/schemas/ClientRequest'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/InvoiceItemRequest'
+
+    InvoiceResponse:
+      allOf:
+        - $ref: '#/components/schemas/InvoiceRequest'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            publicToken:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            client:
+              $ref: '#/components/schemas/ClientResponse'
+            items:
+              type: array
+              items:
+                $ref: '#/components/schemas/InvoiceItemResponse'
 
     PaginatedInvoiceResponse:
       type: object
@@ -354,3 +422,4 @@ components:
       properties:
         exists:
           type: boolean
+          example: true

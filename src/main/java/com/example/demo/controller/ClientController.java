@@ -33,4 +33,11 @@ public class ClientController implements ClientApi {
     public ResponseEntity<Long> createClient(ClientRequest clientRequest) {
         return ResponseEntity.status(HttpStatus.CREATED).body(clientService.createClient(clientRequest));
     }
+
+    @Override
+    public ResponseEntity<Long> updateClient(Long invoiceId, ClientRequest clientRequest) {
+        return ResponseEntity.ok(clientService.updateClientById(invoiceId, clientRequest));
+    }
+
+
 }

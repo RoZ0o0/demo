@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Client;
+import com.example.demo.exception.ClientNotFoundException;
 import com.example.demo.exception.NipAlreadyExistsException;
 import com.example.demo.mapper.ClientMapper;
 import com.example.demo.models.*;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,5 +43,17 @@ public class ClientService {
 
         Client client = new Client().updateFromRequest(clientRequest);
         return clientRepository.save(client).getId();
+    }
+
+    public Long updateClientById(Long clientId, ClientRequest clientRequest) {
+        Optional<Client> client = clientRepository.findById(clientId);
+
+        if (client.isEmpty()) {
+            throw new ClientNotFoundException(clientId);
+        }
+
+        client.get().updateFromRequest(clientRequest);
+
+        return clientRepository.save(client.get()).getId();
     }
 }
