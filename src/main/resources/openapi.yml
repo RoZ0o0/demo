@@ -92,6 +92,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedClientResponse'
+    post:
+      summary: Create a new client
+      operationId: createClient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRequest'
+      responses:
+        '201':
+          description: Successfully created client
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
 
   /client/exists:
     get:

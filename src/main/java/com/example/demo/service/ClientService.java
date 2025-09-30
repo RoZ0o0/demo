@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import com.example.demo.entity.Client;
+import com.example.demo.exception.NipAlreadyExistsException;
 import com.example.demo.mapper.ClientMapper;
 import com.example.demo.models.*;
 import com.example.demo.repository.ClientRepository;
@@ -27,5 +29,16 @@ public class ClientService {
         CheckClientNipExistsResponse response = new CheckClientNipExistsResponse();
         response.setExists(exists);
         return response;
+    }
+
+    public Long createClient(ClientRequest clientRequest) {
+        String nip = clientRequest.getNip();
+
+        if (clientRepository.existsByNip(nip)) {
+            throw new NipAlreadyExistsException(nip);
+        }
+
+        Client client = new Client().updateFromRequest(clientRequest);
+        return clientRepository.save(client).getId();
     }
 }

@@ -2,9 +2,11 @@ package com.example.demo.controller;
 
 import com.example.demo.api.ClientApi;
 import com.example.demo.models.CheckClientNipExistsResponse;
+import com.example.demo.models.ClientRequest;
 import com.example.demo.models.PaginatedClientResponse;
 import com.example.demo.service.ClientService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,5 +27,10 @@ public class ClientController implements ClientApi {
     @Override
     public ResponseEntity<CheckClientNipExistsResponse> checkClientNipExists(String nip) {
         return ResponseEntity.ok(clientService.checkNipExists(nip));
+    }
+
+    @Override
+    public ResponseEntity<Long> createClient(ClientRequest clientRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(clientService.createClient(clientRequest));
     }
 }
