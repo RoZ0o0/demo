@@ -6,7 +6,9 @@ import com.example.demo.exception.NipAlreadyExistsException;
 import com.example.demo.mapper.ClientMapper;
 import com.example.demo.models.*;
 import com.example.demo.repository.ClientRepository;
+import com.example.demo.specification.ClientSpecifications;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,10 +23,20 @@ public class ClientService {
 
     private static final int MAX_CLIENT_LIMIT = 10000;
 
-    public PaginatedClientResponse getClientsPaginated(Integer page, Integer size) {
+    public PaginatedClientResponse searchClients(Integer page, Integer size, String search) {
         Pageable pageable;
         pageable = size == null ? PageRequest.of(page, MAX_CLIENT_LIMIT) : PageRequest.of(page, size);
-        return clientMapper.toResponse(clientRepository.findAll(pageable));
+
+        if (search == null || search.trim().isEmpty()) {
+            Page<Client> clientPage = clientRepository.findAll(pageable);
+            return clientMapper.toResponse(clientPage);
+        }
+
+        Page<Client> clientPage = clientRepository.findAll(
+                ClientSpecifications.searchClient(search), pageable
+        );
+
+        return clientMapper.toResponse(clientPage);
     }
 
     public CheckClientNipExistsResponse checkNipExists(String nip) {

@@ -119,23 +119,31 @@ paths:
 
   /invoice:
     get:
-      summary: Get paginated invoices
-      operationId: getInvoices
+      summary: Get paginated invoices with search
+      operationId: searchInvoices
       tags:
         - Invoice
       parameters:
         - in: query
           name: page
+          required: true
           schema:
             type: integer
             minimum: 0
           description: Zero-based page index (0..N)
         - in: query
           name: size
+          required: true
           schema:
             type: integer
             minimum: 1
           description: The size of the page to be returned
+        - in: query
+          name: search
+          description: Search invoices by invoice number or client
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Paginated invoices
@@ -176,8 +184,8 @@ paths:
 
   /client:
     get:
-      summary: Get paginated clients
-      operationId: getClients
+      summary: Get paginated clients with search
+      operationId: searchClients
       tags:
         - Client
       parameters:
@@ -195,9 +203,15 @@ paths:
             type: integer
             minimum: 1
           description: The size of the page to be returned
+        - in: query
+          name: search
+          description: Search clients by name, nip, address, email or phone
+          required: false
+          schema:
+            type: string
       responses:
         '200':
-          description: Paginated clients
+          description: Paginated clients with searched text
           content:
             application/json:
               schema:

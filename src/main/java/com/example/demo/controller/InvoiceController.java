@@ -9,7 +9,6 @@ import com.example.demo.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -39,11 +38,8 @@ public class InvoiceController implements InvoiceApi {
     }
 
     @Override
-    public ResponseEntity<PaginatedInvoiceResponse> getInvoices(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "20") Integer size
-    ) {
-        return ResponseEntity.ok(invoiceService.getInvoicesPaginated(page, size));
+    public ResponseEntity<PaginatedInvoiceResponse> searchInvoices(Integer page, Integer size, String search) {
+        return ResponseEntity.ok(invoiceService.searchInvoices(page, size, search));
     }
 
     @Override

@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequiredArgsConstructor
@@ -17,11 +16,8 @@ public class ClientController implements ClientApi {
     private final ClientService clientService;
 
     @Override
-    public ResponseEntity<PaginatedClientResponse> getClients(
-            @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(required = false) Integer size
-    ) {
-        return ResponseEntity.ok(clientService.getClientsPaginated(page, size));
+    public ResponseEntity<PaginatedClientResponse> searchClients(Integer page, Integer size, String search) {
+        return ResponseEntity.ok(clientService.searchClients(page, size, search));
     }
 
     @Override

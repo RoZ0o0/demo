@@ -8,6 +8,7 @@ import com.example.demo.mapper.InvoiceMapper;
 import com.example.demo.models.*;
 import com.example.demo.repository.ClientRepository;
 import com.example.demo.repository.InvoiceRepository;
+import com.example.demo.specification.InvoiceSpecifications;
 import com.example.demo.util.InvoiceValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -55,10 +56,19 @@ public class InvoiceService {
         return invoiceRepository.save(invoice).getId();
     }
 
-    public PaginatedInvoiceResponse getInvoicesPaginated(Integer page, Integer size) {
+    public PaginatedInvoiceResponse searchInvoices(Integer page, Integer size, String search) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Invoice> invoice = invoiceRepository.findAll(pageable);
-        return invoiceMapper.toResponse(invoice);
+
+        if (search == null || search.trim().isEmpty()) {
+            Page<Invoice> invoicePage = invoiceRepository.findAll(pageable);
+            return invoiceMapper.toResponse(invoicePage);
+        }
+
+        Page<Invoice> invoicePage = invoiceRepository.findAll(
+                InvoiceSpecifications.searchInvoice(search), pageable
+        );
+
+        return invoiceMapper.toResponse(invoicePage);
     }
 
     public void deleteInvoiceById(Long invoiceId) {
