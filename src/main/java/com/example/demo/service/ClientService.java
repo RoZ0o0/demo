@@ -58,14 +58,16 @@ public class ClientService {
     }
 
     public Long updateClientById(Long clientId, ClientRequest clientRequest) {
-        Optional<Client> client = clientRepository.findById(clientId);
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new ClientNotFoundException(clientId));
 
-        if (client.isEmpty()) {
-            throw new ClientNotFoundException(clientId);
+        Optional<Client> existingClientWithNip = clientRepository.findByNip(clientRequest.getNip());
+        if (existingClientWithNip.isPresent() && !existingClientWithNip.get().getId().equals(clientId)) {
+            throw new NipAlreadyExistsException(clientRequest.getNip());
         }
 
-        client.get().updateFromRequest(clientRequest);
+        client.updateFromRequest(clientRequest);
 
-        return clientRepository.save(client.get()).getId();
+        return clientRepository.save(client).getId();
     }
 }
