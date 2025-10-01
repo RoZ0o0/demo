@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -29,7 +30,7 @@ class InvoiceRepositoryIntegrationTest {
     @Autowired
     private ClientRepository clientRepository;
 
-    private Invoice testInvoice1;
+    private Invoice testInvoice;
 
     @BeforeEach
     void setUp() {
@@ -47,6 +48,7 @@ class InvoiceRepositoryIntegrationTest {
 
         Invoice invoice1 = Invoice.builder()
                 .invoiceNumber("FV/2025/01/01/00001")
+                .publicToken("d201d0dc-006f-4faa-8fc3-7783ba1b5c8e")
                 .issueDate(LocalDate.now())
                 .dueDate(LocalDate.now().plusDays(1))
                 .totalNet(BigDecimal.valueOf(400))
@@ -81,7 +83,7 @@ class InvoiceRepositoryIntegrationTest {
 
         clientRepository.save(client1);
 
-        testInvoice1 = invoiceRepository.save(invoice1);
+        testInvoice = invoiceRepository.save(invoice1);
 
         Client client2 = Client.builder()
                 .name("Corp S.A.")
@@ -93,6 +95,7 @@ class InvoiceRepositoryIntegrationTest {
 
         Invoice invoice2 = Invoice.builder()
                 .invoiceNumber("FV/2025/01/02/00005")
+                .publicToken("lk1j2h32-006f-4faa-8fc3-8dj21bdh23js")
                 .issueDate(LocalDate.now())
                 .dueDate(LocalDate.now().plusDays(1))
                 .totalNet(BigDecimal.valueOf(400))
@@ -139,7 +142,7 @@ class InvoiceRepositoryIntegrationTest {
 
     @Test
     void shouldReturnTrueIfInvoiceExists() {
-        boolean exists = invoiceRepository.existsByInvoiceNumber(testInvoice1.getInvoiceNumber());
+        boolean exists = invoiceRepository.existsByInvoiceNumber(testInvoice.getInvoiceNumber());
         assertTrue(exists);
     }
 
@@ -171,5 +174,29 @@ class InvoiceRepositoryIntegrationTest {
     void shouldIgnoreInvoicesWithDifferentPrefix() {
         Integer max = invoiceRepository.findMaxSuffixByPrefix("FV/2025/01/02/");
         assertEquals(5, max);
+    }
+
+    @Test
+    void existsByInvoiceNumberAndIdNot_shouldReturnTrue_whenAnotherInvoiceHasSameInvoiceNumber() {
+        boolean exists = invoiceRepository.existsByInvoiceNumberAndIdNot(testInvoice.getInvoiceNumber(), 2L);
+        assertTrue(exists);
+    }
+
+    @Test
+    void existsByInvoiceNumberAndIdNot_shouldReturnFalse_whenNoOtherInvoiceHasSameInvoiceNumber() {
+        boolean exists = invoiceRepository.existsByInvoiceNumberAndIdNot(testInvoice.getInvoiceNumber(), testInvoice.getId());
+        assertFalse(exists);
+    }
+
+    @Test
+    void findByPublicToken_shouldReturnInvoice_whenTokenExists() {
+        Optional<Invoice> invoice = invoiceRepository.findByPublicToken(testInvoice.getPublicToken());
+        assertTrue(invoice.isPresent());
+    }
+
+    @Test
+    void findByPublicToken_shouldReturnEmpty_whenTokenDoesNotExist() {
+        Optional<Invoice> invoice = invoiceRepository.findByPublicToken("a3f1c2d4-7e8b-4f9a-9b6c-2d3e4f5a6b7c");
+        assertTrue(invoice.isEmpty());
     }
 }

@@ -29,6 +29,8 @@ class ClientRepositoryIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private Client testClient;
+
     @BeforeEach
     void setUp() {
         invoiceItemRepository.deleteAll();
@@ -43,7 +45,7 @@ class ClientRepositoryIntegrationTest {
                 .address("New Street")
                 .build();
 
-        clientRepository.save(client1);
+        testClient = clientRepository.save(client1);
     }
 
     @AfterEach
@@ -54,26 +56,26 @@ class ClientRepositoryIntegrationTest {
     }
 
     @Test
-    void shouldFindClientByNip() {
-        Optional<Client> clientOptional = clientRepository.findByNip("9876243210");
+    void findByNip_shouldFindClientByNip() {
+        Optional<Client> clientOptional = clientRepository.findByNip(testClient.getNip());
         assertThat(clientOptional).isPresent();
     }
 
     @Test
-    void shouldReturnEmptyWhenNipNotFound() {
-        Optional<Client> clientOptional = clientRepository.findByNip("123123123");
+    void findByNip_shouldReturnEmpty_whenNipNotFound() {
+        Optional<Client> clientOptional = clientRepository.findByNip("123456789");
         assertThat(clientOptional).isEmpty();
     }
 
     @Test
-    void shouldReturnTrueWhenClientExistsByNip() {
-        boolean exists = clientRepository.existsByNip("9876243210");
+    void existsByNip_shouldReturnTrue_whenClientExistsByNip() {
+        boolean exists = clientRepository.existsByNip(testClient.getNip());
         assertThat(exists).isTrue();
     }
 
     @Test
-    void shouldReturnFalseWhenClientDoesNotExistByNip() {
-        boolean exists = clientRepository.existsByNip("123123123");
+    void existsByNip_shouldReturnFalse_whenClientDoesNotExistByNip() {
+        boolean exists = clientRepository.existsByNip("123456789");
         assertThat(exists).isFalse();
     }
 }
