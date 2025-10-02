@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.TestcontainersConfiguration;
+import com.example.demo.config.TestSecurityConfig;
 import com.example.demo.entity.Client;
 import com.example.demo.models.ClientRequest;
 import com.example.demo.repository.ClientRepository;
@@ -17,12 +18,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestcontainersConfiguration.class)
+@Import({TestcontainersConfiguration.class, TestSecurityConfig.class})
+@ActiveProfiles("test")
 class ClientControllerIntegrationTest {
     @LocalServerPort
     private int port;

@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.TestcontainersConfiguration;
+import com.example.demo.config.TestSecurityConfig;
 import com.example.demo.entity.Client;
 import com.example.demo.entity.Invoice;
 import com.example.demo.entity.InvoiceItem;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,7 +21,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@Import(TestcontainersConfiguration.class)
+@Import({TestcontainersConfiguration.class, TestSecurityConfig.class})
+@ActiveProfiles("test")
 class InvoiceRepositoryIntegrationTest {
     @Autowired
     private InvoiceRepository invoiceRepository;
