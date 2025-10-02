@@ -44,9 +44,6 @@ public class InvoiceValidator {
             if (unitPrice.scale() > 2) {
                 throw new InvalidInvoiceItemException("Unit price must have at most 2 decimal places");
             }
-            if (BigDecimal.valueOf(item.getQuantity()).scale() > 0) {
-                throw new InvalidInvoiceItemException("Quantity must be a whole number");
-            }
         }
     }
 
