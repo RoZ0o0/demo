@@ -90,7 +90,7 @@ docker compose down
 Once the backend is running, access the API documentation via Swagger at:
 
 ```
-http://localhost:8080/swagger-ui.html
+http://localhost:8080/swagger-ui/index.html#/
 ```
 
 ---
