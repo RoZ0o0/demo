@@ -1,7 +1,6 @@
 package com.example.demo.controller;
 
 import com.example.demo.TestcontainersConfiguration;
-import com.example.demo.config.TestSecurityConfig;
 import com.example.demo.entity.Client;
 import com.example.demo.entity.Invoice;
 import com.example.demo.entity.InvoiceItem;
@@ -22,7 +21,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import io.restassured.specification.RequestSpecification;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,8 +30,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import({TestcontainersConfiguration.class, TestSecurityConfig.class})
-@ActiveProfiles("test")
+@Import(TestcontainersConfiguration.class)
 class InvoiceControllerIntegrationTest {
     @LocalServerPort
     private int port;
@@ -54,7 +51,8 @@ class InvoiceControllerIntegrationTest {
     private Client testClient;
 
     private RequestSpecification givenURL() {
-        return given().baseUri("http://localhost").port(this.port).contentType(ContentType.JSON);
+        return given().baseUri("http://localhost").port(this.port).contentType(ContentType.JSON)
+                .auth().basic("admin", "secret");
     }
 
     @BeforeEach

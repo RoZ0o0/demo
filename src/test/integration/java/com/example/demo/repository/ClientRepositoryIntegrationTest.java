@@ -1,7 +1,6 @@
 package com.example.demo.repository;
 
 import com.example.demo.TestcontainersConfiguration;
-import com.example.demo.config.TestSecurityConfig;
 import com.example.demo.entity.Client;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,15 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
-@Import({TestcontainersConfiguration.class, TestSecurityConfig.class})
-@ActiveProfiles("test")
+@Import(TestcontainersConfiguration.class)
 class ClientRepositoryIntegrationTest {
     @Autowired
     private InvoiceRepository invoiceRepository;
