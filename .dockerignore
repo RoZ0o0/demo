@@ -1,6 +1,3 @@
-# Ignore Maven target directory
-target/
-
 # Ignore local IDE files
 *.iml
 *.idea/

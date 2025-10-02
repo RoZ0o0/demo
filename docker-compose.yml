@@ -1,6 +1,7 @@
 services:
   postgres:
     image: 'postgres:15.3'
+    container_name: demo-postgres
     restart: always
     environment:
       POSTGRES_DB: demo_db
@@ -8,3 +9,10 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+    networks:
+      - demo-net
+
+networks:
+  demo-net:
+    driver: bridge
+    name: demo-net
